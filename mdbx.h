@@ -23,12 +23,12 @@ developers. For the same reason ~~Github~~ is blacklisted forever.
 _The Future will (be) [Positive](https://www.ptsecurity.com). Всё будет хорошо._
 
 
-\section copyright LICENSE & COPYRIGHT
+section copyright LICENSE & COPYRIGHT
 
-\authors Copyright (c) 2015-2022, Leonid Yuriev <leo@yuriev.ru>
+authors Copyright (c) 2015-2022, Leonid Yuriev <leo@yuriev.ru>
 and other _libmdbx_ authors: please see [AUTHORS](./AUTHORS) file.
 
-\copyright Redistribution and use in source and binary forms, with or without
+copyright Redistribution and use in source and binary forms, with or without
 modification, are permitted only as authorized by the OpenLDAP Public License.
 
 A copy of this license is available in the file LICENSE in the
@@ -97,19 +97,19 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* *INDENT-OFF* */
 /* clang-format off */
 /**
- \file mdbx.h
- \brief The libmdbx C API header file
+ file mdbx.h
+ brief The libmdbx C API header file
 
- \defgroup c_api C API
+ defgroup c_api C API
  @{
- \defgroup c_err Error handling
- \defgroup c_opening Opening & Closing
- \defgroup c_transactions Transactions
- \defgroup c_dbi Databases
- \defgroup c_crud Create/Read/Update/Delete (see Quick Reference in details)
+ defgroup c_err Error handling
+ defgroup c_opening Opening & Closing
+ defgroup c_transactions Transactions
+ defgroup c_dbi Databases
+ defgroup c_crud Create/Read/Update/Delete (see Quick Reference in details)
 
- \details
- \anchor c_crud_hints
+ details
+ anchor c_crud_hints
 # Quick Reference for Insert/Update/Delete operations
 
 Historically, libmdbx inherits the API basis from LMDB, where it is often
@@ -118,32 +118,32 @@ So it is recommend using this hints.
 
 ## Databases with UNIQUE keys
 
-In databases created without the \ref MDBX_DUPSORT option, keys are always
+In databases created without the ref MDBX_DUPSORT option, keys are always
 unique. Thus always a single value corresponds to the each key, and so there
 are only a few cases of changing data.
 
 | Case                                        | Flags to use        | Result                 |
 |---------------------------------------------|---------------------|------------------------|
 | _INSERTING_|||
-|Key is absent → Insertion                    |\ref MDBX_NOOVERWRITE|Insertion               |
-|Key exist → Error since key present          |\ref MDBX_NOOVERWRITE|Error \ref MDBX_KEYEXIST and return Present value|
+|Key is absent → Insertion                    |ref MDBX_NOOVERWRITE|Insertion               |
+|Key exist → Error since key present          |ref MDBX_NOOVERWRITE|Error ref MDBX_KEYEXIST and return Present value|
 | _UPSERTING_|||
-|Key is absent → Insertion                    |\ref MDBX_UPSERT     |Insertion               |
-|Key exist → Update                           |\ref MDBX_UPSERT     |Update                  |
+|Key is absent → Insertion                    |ref MDBX_UPSERT     |Insertion               |
+|Key exist → Update                           |ref MDBX_UPSERT     |Update                  |
 |  _UPDATING_|||
-|Key is absent → Error since no such key      |\ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
-|Key exist → Update                           |\ref MDBX_CURRENT    |Update value            |
+|Key is absent → Error since no such key      |ref MDBX_CURRENT    |Error ref MDBX_NOTFOUND|
+|Key exist → Update                           |ref MDBX_CURRENT    |Update value            |
 | _DELETING_|||
-|Key is absent → Error since no such key      |\ref mdbx_del() or \ref mdbx_replace()|Error \ref MDBX_NOTFOUND|
-|Key exist → Delete by key                    |\ref mdbx_del() with the parameter `data = NULL`|Deletion|
-|Key exist → Delete by key with with data matching check|\ref mdbx_del() with the parameter `data` filled with the value which should be match for deletion|Deletion or \ref MDBX_NOTFOUND if the value does not match|
-|Delete at the current cursor position        |\ref mdbx_cursor_del() with \ref MDBX_CURRENT flag|Deletion|
-|Extract (read & delete) value by the key     |\ref mdbx_replace() with zero flag and parameter `new_data = NULL`|Returning a deleted value|
+|Key is absent → Error since no such key      |ref mdbx_del() or ref mdbx_replace()|Error ref MDBX_NOTFOUND|
+|Key exist → Delete by key                    |ref mdbx_del() with the parameter `data = NULL`|Deletion|
+|Key exist → Delete by key with with data matching check|ref mdbx_del() with the parameter `data` filled with the value which should be match for deletion|Deletion or \ref MDBX_NOTFOUND if the value does not match|
+|Delete at the current cursor position        |ref mdbx_cursor_del() with ref MDBX_CURRENT flag|Deletion|
+|Extract (read & delete) value by the key     |ref mdbx_replace() with zero flag and parameter `new_data = NULL`|Returning a deleted value|
 
 
 ## Databases with NON-UNIQUE keys
 
-In databases created with the \ref MDBX_DUPSORT (Sorted Duplicates) option, keys
+In databases created with the ref MDBX_DUPSORT (Sorted Duplicates) option, keys
 may be non unique. Such non-unique keys in a key-value database may be treated
 as a duplicates or as like a multiple values corresponds to keys.
 
@@ -151,15 +151,15 @@ as a duplicates or as like a multiple values corresponds to keys.
 | Case                                        | Flags to use        | Result                 |
 |---------------------------------------------|---------------------|------------------------|
 | _INSERTING_|||
-|Key is absent → Insertion                    |\ref MDBX_NOOVERWRITE|Insertion|
-|Key exist → Needn't to add new values        |\ref MDBX_NOOVERWRITE|Error \ref MDBX_KEYEXIST with returning the first value from those already present|
+|Key is absent → Insertion                    |ref MDBX_NOOVERWRITE|Insertion|
+|Key exist → Needn't to add new values        |ref MDBX_NOOVERWRITE|Error ref MDBX_KEYEXIST with returning the first value from those already present|
 | _UPSERTING_|||
-|Key is absent → Insertion                    |\ref MDBX_UPSERT     |Insertion|
-|Key exist → Wanna to add new values          |\ref MDBX_UPSERT     |Add one more value to the key|
-|Key exist → Replace all values with a new one|\ref MDBX_UPSERT + \ref MDBX_ALLDUPS|Overwrite by single new value|
+|Key is absent → Insertion                    |ref MDBX_UPSERT     |Insertion|
+|Key exist → Wanna to add new values          |ref MDBX_UPSERT     |Add one more value to the key|
+|Key exist → Replace all values with a new one|ref MDBX_UPSERT + ref MDBX_ALLDUPS|Overwrite by single new value|
 |  _UPDATING_|||
-|Key is absent → Error since no such key      |\ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
-|Key exist, Single value → Update             |\ref MDBX_CURRENT    |Update single value    |
+|Key is absent → Error since no such key      |ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
+|Key exist, Single value → Update             |ref MDBX_CURRENT    |Update single value    |
 |Key exist, Multiple values → Replace all values with a new one|\ref MDBX_CURRENT + \ref MDBX_ALLDUPS|Overwrite by single new value|
 |Key exist, Multiple values → Error since it is unclear which of the values should be updated|\ref mdbx_put() with \ref MDBX_CURRENT|Error \ref MDBX_EMULTIVAL|
 |Key exist, Multiple values → Update particular entry of multi-value|\ref mdbx_replace() with \ref MDBX_CURRENT + \ref MDBX_NOOVERWRITE and the parameter `old_value` filled with the value that wanna to update|Update one multi-value entry|
@@ -171,12 +171,12 @@ as a duplicates or as like a multiple values corresponds to keys.
 |Delete one value at the current cursor position|\ref mdbx_cursor_del() with \ref MDBX_CURRENT flag|Deletion only the current entry|
 |Delete all values of key at the current cursor position|\ref mdbx_cursor_del() with with \ref MDBX_ALLDUPS flag|Deletion all duplicates of key (all multi-values) at the current cursor position|
 
- \defgroup c_cursors Cursors
- \defgroup c_statinfo Statistics & Information
- \defgroup c_settings Settings
- \defgroup c_debug Logging and runtime debug
- \defgroup c_rqest Range query estimation
- \defgroup c_extra Extra operations
+ defgroup c_cursors Cursors
+ defgroup c_statinfo Statistics & Information
+ defgroup c_settings Settings
+ defgroup c_debug Logging and runtime debug
+ defgroup c_rqest Range query estimation
+ defgroup c_extra Extra operations
 */
 /* *INDENT-ON* */
 /* clang-format on */
