@@ -1,0 +1,2 @@
+# gmdbx
+golang wrap libmdbx
