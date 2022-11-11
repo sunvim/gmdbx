@@ -5,9 +5,14 @@ package gmdbx
 */
 import "C"
 import (
+	"errors"
 	"unsafe"
 
 	"github.com/sunvim/gmdbx/unsafecgo"
+)
+
+var (
+	NotFound = errors.New("not found")
 )
 
 type Error int32
