@@ -4,14 +4,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"math/rand"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func newTestDb() (*DB, error) {
-	path := "/home/mobus/tmp/testmdbx"
-	// os.RemoveAll(path)
+	path := "/tmp/testmdbx"
+	os.RemoveAll(path)
 
 	db, err := New(path)
 	if err != nil {
@@ -72,48 +73,6 @@ func TestUpdateAndView(t *testing.T) {
 
 	assert.Equal(t, val, vi.Bytes(), "update and view")
 
-}
-
-func TestPutAndGet(t *testing.T) {
-	db, err := newTestDb()
-	if err != nil {
-		t.Fatal("open db failed: ", err)
-	}
-	defer db.Close()
-
-	var tables = []struct {
-		Key  []byte
-		Want []byte
-		Act  []byte
-	}{
-		{
-			Key:  []byte("1"),
-			Want: []byte("w"),
-		},
-		{
-			Key:  []byte{},
-			Want: []byte("nil"),
-		},
-		{
-			Key:  []byte("hello"),
-			Want: []byte("xxxxxxxxxxxxx"),
-		},
-	}
-
-	for _, v := range tables {
-		err := db.Put(v.Key, v.Want)
-		if err != nil {
-			t.Fatal("put failed: ", err)
-		}
-	}
-
-	for _, v := range tables {
-		v.Act, err = db.Get(v.Key)
-		if err != nil {
-			t.Fatal("put failed: ", err)
-		}
-		assert.Equal(t, v.Want, v.Act, "PutAndGet")
-	}
 }
 
 func TestPut(b *testing.T) {
@@ -177,16 +136,35 @@ func TestPut(b *testing.T) {
 		if err != ErrSuccess {
 			break
 		}
-		b.Logf("cursor key: %v val: %v \n", k.Bytes(), v.Bytes())
 	}
 
 	// get
 	for i := 0; i < 100; i++ {
 		k := ToVal(i)
 		rtx.Get(dbi, &k, &v)
-		b.Logf("get key: %v val: %v \n", k.Bytes(), v.Bytes())
 	}
 
+}
+
+func BenchmarkDBPut(b *testing.B) {
+	db, err := newTestDb()
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer db.Close()
+	k, v := "hello", "world"
+	ki, vi := String(&k), String(&v)
+	b.ResetTimer()
+	db.Update(func(tx *Tx) error {
+
+		dbi, _ := tx.OpenDBI("default", DBCreate)
+		defer db.CloseDBI(dbi)
+
+		for i := 0; i < b.N; i++ {
+			tx.Put(dbi, &ki, &vi, PutUpsert)
+		}
+		return nil
+	})
 }
 
 func I2b(v uint64) []byte {

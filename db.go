@@ -2,14 +2,11 @@ package gmdbx
 
 import (
 	"errors"
-	"reflect"
-	"runtime"
 )
 
 type DB struct {
 	env  *Env
 	opts *Option
-	dbi  DBI
 }
 
 // New create new database
@@ -59,19 +56,6 @@ func (d *DB) Open() error {
 		return errors.New(err.Error())
 	}
 
-	txn := NewTransaction(d.env)
-	err = d.env.Begin(txn, TxReadWrite)
-	if err != ErrSuccess {
-		return errors.New(err.Error())
-	}
-	defer txn.Commit()
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-	d.dbi, err = txn.OpenDBI("default", DBCreate)
-	if err != ErrSuccess {
-		return errors.New(err.Error())
-	}
-
 	return nil
 }
 
@@ -97,75 +81,16 @@ func (d *DB) View(fn func(tx *Tx) error) error {
 	return fn(txn)
 }
 
-func (d *DB) Put(k, v []byte) error {
-	txn := NewTransaction(d.env)
-	err := d.env.Begin(txn, TxReadWrite)
-	if err != ErrSuccess {
-		return errors.New(err.Error())
-	}
-	defer txn.Commit()
-
-	var ki, vi Val
-	if k != nil && !reflect.DeepEqual(k, []byte{}) {
-		ki = Bytes(&k)
-	}
-	if v != nil && !reflect.DeepEqual(v, []byte{}) {
-		vi = Bytes(&v)
-	}
-
-	err = txn.Put(d.dbi, &ki, &vi, PutUpsert)
-	if err != ErrSuccess {
+func (d *DB) CloseDBI(dbi DBI) error {
+	if err := d.env.CloseDBI(dbi); err != ErrSuccess {
 		return errors.New(err.Error())
 	}
 	return nil
-}
-
-func (d *DB) Del(k []byte) error {
-
-	txn := NewTransaction(d.env)
-	err := d.env.Begin(txn, TxReadWrite)
-	if err != ErrSuccess {
-		return errors.New(err.Error())
-	}
-	defer txn.Commit()
-
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-	var ki Val
-	if k != nil && !reflect.DeepEqual(k, []byte{}) {
-		ki = Bytes(&k)
-	}
-	err = txn.Delete(d.dbi, &ki, nil)
-	if err != ErrSuccess {
-		return errors.New(err.Error())
-	}
-	return nil
-}
-
-func (d *DB) Get(k []byte) ([]byte, error) {
-	txn := NewTransaction(d.env)
-	err := d.env.Begin(txn, TxReadOnly)
-	if err != ErrSuccess {
-		return nil, errors.New(err.Error())
-	}
-	defer txn.Commit()
-	var ki Val
-	if k != nil && !reflect.DeepEqual(k, []byte{}) {
-		ki = Bytes(&k)
-	}
-	vi := Val{}
-	err = txn.Get(d.dbi, &ki, &vi)
-	if err != ErrSuccess && err != ErrNotFound {
-		return nil, errors.New(err.Error())
-	}
-	if err == ErrNotFound {
-		return nil, NotFound
-	}
-	return vi.Bytes(), nil
 }
 
 func (d *DB) Close() error {
-	d.env.CloseDBI(d.dbi)
-	d.env.Close(false)
+	if err := d.env.Close(false); err != ErrSuccess {
+		return errors.New(err.Error())
+	}
 	return nil
 }
