@@ -26,7 +26,7 @@ func testRead() {
 		log.Fatal("set max dbs: ", err)
 	}
 
-	env.SetGeometry(DefaultStableGeometry)
+	env.SetGeometry(defaultGeometry)
 
 	err = env.Open("tmp.db", gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable, 0755)
 	if !errors.Is(err, gmdbx.ErrSuccess) {
@@ -70,7 +70,7 @@ func testWrite() {
 		log.Fatal("set max dbs: ", err)
 	}
 
-	err = env.SetGeometry(DefaultStableGeometry)
+	err = env.SetGeometry(defaultGeometry)
 	if err != gmdbx.ErrSuccess {
 		log.Fatal("set geometry failed")
 	}
@@ -101,8 +101,10 @@ func testWrite() {
 	stx := time.Now()
 	var i uint64
 
+	// if there are amounts of data to write, please lock the OS thread frist
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
+
 	for i = 0; i < 100000; i++ {
 		kb := append([]byte(prikey), I2b(i)...)
 		vb := randomString(4096)
@@ -141,41 +143,21 @@ func randomString(n int) []byte {
 }
 
 const (
-	DefaultLogFlags = gmdbx.EnvNoMetaSync |
+	defaultFlags = gmdbx.EnvSyncDurable |
 		gmdbx.EnvNoTLS |
 		gmdbx.EnvWriteMap |
 		gmdbx.EnvLIFOReclaim |
 		gmdbx.EnvNoMemInit |
 		gmdbx.EnvCoalesce
-
-	DefaultStableFlags = gmdbx.EnvSyncDurable |
-		gmdbx.EnvNoTLS |
-		gmdbx.EnvWriteMap |
-		gmdbx.EnvLIFOReclaim |
-		gmdbx.EnvNoMemInit |
-		gmdbx.EnvCoalesce
-
-	Kilobyte = 1024
-	Megabyte = 1024 * 1024
-	Gigabyte = Megabyte * 1024
-	Terabyte = Gigabyte * 1024
 )
 
 var (
-	DefaultStableGeometry = gmdbx.Geometry{
+	defaultGeometry = gmdbx.Geometry{
 		SizeLower:       1 << 30,
 		SizeNow:         1 << 30,
 		SizeUpper:       1 << 34,
 		GrowthStep:      1 << 30,
 		ShrinkThreshold: 1 << 63,
 		PageSize:        1 << 16,
-	}
-	DefaultLogGeometry = gmdbx.Geometry{
-		SizeLower:       1 * Megabyte,
-		SizeNow:         1 * Megabyte,
-		SizeUpper:       4 * Gigabyte,
-		GrowthStep:      16 * Megabyte,
-		ShrinkThreshold: 8 * Megabyte,
-		PageSize:        8 * Kilobyte,
 	}
 )
