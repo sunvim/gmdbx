@@ -4,7 +4,7 @@
 package unsafecgo
 
 import (
-	"github.com/moontrade/mdbx-go/internal/unsafecgo/cgo"
+	"github.com/sunvim/gmdbx/unsafecgo/cgo"
 )
 
 func NonBlocking(fn *byte, arg0, arg1 uintptr) {
