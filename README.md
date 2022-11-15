@@ -1,5 +1,5 @@
 # gmdbx
-golang wrap libmdbx
+golang wrap libmdbx, api is simple, like [boltdb](http://github.com/boltdb/bolt)
 
 # reference
   [libmdbx](https://gitflic.ru/project/erthink/libmdbx)
