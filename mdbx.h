@@ -23,12 +23,12 @@ developers. For the same reason ~~Github~~ is blacklisted forever.
 _The Future will (be) [Positive](https://www.ptsecurity.com). Всё будет хорошо._
 
 
-section copyright LICENSE & COPYRIGHT
+\section copyright LICENSE & COPYRIGHT
 
-authors Copyright (c) 2015-2022, Leonid Yuriev <leo@yuriev.ru>
+\authors Copyright (c) 2015-2022, Leonid Yuriev <leo@yuriev.ru>
 and other _libmdbx_ authors: please see [AUTHORS](./AUTHORS) file.
 
-copyright Redistribution and use in source and binary forms, with or without
+\copyright Redistribution and use in source and binary forms, with or without
 modification, are permitted only as authorized by the OpenLDAP Public License.
 
 A copy of this license is available in the file LICENSE in the
@@ -75,14 +75,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef LIBMDBX_H
 #define LIBMDBX_H
 
-#if defined(__riscv) || defined(__riscv__) || defined(__RISCV) ||              \
-    defined(__RISCV__)
-#warning The RISC-V architecture is intentionally insecure by design. \
-  Please delete this admonition at your own risk, \
-  if you make such decision informed and consciously. \
-  Refer to https://clck.ru/32d9xH for more information.
-#endif /* RISC-V */
-
 #ifdef _MSC_VER
 #pragma warning(push, 1)
 #pragma warning(disable : 4548) /* expression before comma has no effect;      \
@@ -97,19 +89,19 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* *INDENT-OFF* */
 /* clang-format off */
 /**
- file mdbx.h
- brief The libmdbx C API header file
+ \file mdbx.h
+ \brief The libmdbx C API header file
 
- defgroup c_api C API
+ \defgroup c_api C API
  @{
- defgroup c_err Error handling
- defgroup c_opening Opening & Closing
- defgroup c_transactions Transactions
- defgroup c_dbi Databases
- defgroup c_crud Create/Read/Update/Delete (see Quick Reference in details)
+ \defgroup c_err Error handling
+ \defgroup c_opening Opening & Closing
+ \defgroup c_transactions Transactions
+ \defgroup c_dbi Databases
+ \defgroup c_crud Create/Read/Update/Delete (see Quick Reference in details)
 
- details
- anchor c_crud_hints
+ \details
+ \anchor c_crud_hints
 # Quick Reference for Insert/Update/Delete operations
 
 Historically, libmdbx inherits the API basis from LMDB, where it is often
@@ -118,32 +110,32 @@ So it is recommend using this hints.
 
 ## Databases with UNIQUE keys
 
-In databases created without the ref MDBX_DUPSORT option, keys are always
+In databases created without the \ref MDBX_DUPSORT option, keys are always
 unique. Thus always a single value corresponds to the each key, and so there
 are only a few cases of changing data.
 
 | Case                                        | Flags to use        | Result                 |
 |---------------------------------------------|---------------------|------------------------|
 | _INSERTING_|||
-|Key is absent → Insertion                    |ref MDBX_NOOVERWRITE|Insertion               |
-|Key exist → Error since key present          |ref MDBX_NOOVERWRITE|Error ref MDBX_KEYEXIST and return Present value|
+|Key is absent → Insertion                    |\ref MDBX_NOOVERWRITE|Insertion               |
+|Key exist → Error since key present          |\ref MDBX_NOOVERWRITE|Error \ref MDBX_KEYEXIST and return Present value|
 | _UPSERTING_|||
-|Key is absent → Insertion                    |ref MDBX_UPSERT     |Insertion               |
-|Key exist → Update                           |ref MDBX_UPSERT     |Update                  |
+|Key is absent → Insertion                    |\ref MDBX_UPSERT     |Insertion               |
+|Key exist → Update                           |\ref MDBX_UPSERT     |Update                  |
 |  _UPDATING_|||
-|Key is absent → Error since no such key      |ref MDBX_CURRENT    |Error ref MDBX_NOTFOUND|
-|Key exist → Update                           |ref MDBX_CURRENT    |Update value            |
+|Key is absent → Error since no such key      |\ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
+|Key exist → Update                           |\ref MDBX_CURRENT    |Update value            |
 | _DELETING_|||
-|Key is absent → Error since no such key      |ref mdbx_del() or ref mdbx_replace()|Error ref MDBX_NOTFOUND|
-|Key exist → Delete by key                    |ref mdbx_del() with the parameter `data = NULL`|Deletion|
-|Key exist → Delete by key with with data matching check|ref mdbx_del() with the parameter `data` filled with the value which should be match for deletion|Deletion or \ref MDBX_NOTFOUND if the value does not match|
-|Delete at the current cursor position        |ref mdbx_cursor_del() with ref MDBX_CURRENT flag|Deletion|
-|Extract (read & delete) value by the key     |ref mdbx_replace() with zero flag and parameter `new_data = NULL`|Returning a deleted value|
+|Key is absent → Error since no such key      |\ref mdbx_del() or \ref mdbx_replace()|Error \ref MDBX_NOTFOUND|
+|Key exist → Delete by key                    |\ref mdbx_del() with the parameter `data = NULL`|Deletion|
+|Key exist → Delete by key with with data matching check|\ref mdbx_del() with the parameter `data` filled with the value which should be match for deletion|Deletion or \ref MDBX_NOTFOUND if the value does not match|
+|Delete at the current cursor position        |\ref mdbx_cursor_del() with \ref MDBX_CURRENT flag|Deletion|
+|Extract (read & delete) value by the key     |\ref mdbx_replace() with zero flag and parameter `new_data = NULL`|Returning a deleted value|
 
 
 ## Databases with NON-UNIQUE keys
 
-In databases created with the ref MDBX_DUPSORT (Sorted Duplicates) option, keys
+In databases created with the \ref MDBX_DUPSORT (Sorted Duplicates) option, keys
 may be non unique. Such non-unique keys in a key-value database may be treated
 as a duplicates or as like a multiple values corresponds to keys.
 
@@ -151,15 +143,15 @@ as a duplicates or as like a multiple values corresponds to keys.
 | Case                                        | Flags to use        | Result                 |
 |---------------------------------------------|---------------------|------------------------|
 | _INSERTING_|||
-|Key is absent → Insertion                    |ref MDBX_NOOVERWRITE|Insertion|
-|Key exist → Needn't to add new values        |ref MDBX_NOOVERWRITE|Error ref MDBX_KEYEXIST with returning the first value from those already present|
+|Key is absent → Insertion                    |\ref MDBX_NOOVERWRITE|Insertion|
+|Key exist → Needn't to add new values        |\ref MDBX_NOOVERWRITE|Error \ref MDBX_KEYEXIST with returning the first value from those already present|
 | _UPSERTING_|||
-|Key is absent → Insertion                    |ref MDBX_UPSERT     |Insertion|
-|Key exist → Wanna to add new values          |ref MDBX_UPSERT     |Add one more value to the key|
-|Key exist → Replace all values with a new one|ref MDBX_UPSERT + ref MDBX_ALLDUPS|Overwrite by single new value|
+|Key is absent → Insertion                    |\ref MDBX_UPSERT     |Insertion|
+|Key exist → Wanna to add new values          |\ref MDBX_UPSERT     |Add one more value to the key|
+|Key exist → Replace all values with a new one|\ref MDBX_UPSERT + \ref MDBX_ALLDUPS|Overwrite by single new value|
 |  _UPDATING_|||
-|Key is absent → Error since no such key      |ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
-|Key exist, Single value → Update             |ref MDBX_CURRENT    |Update single value    |
+|Key is absent → Error since no such key      |\ref MDBX_CURRENT    |Error \ref MDBX_NOTFOUND|
+|Key exist, Single value → Update             |\ref MDBX_CURRENT    |Update single value    |
 |Key exist, Multiple values → Replace all values with a new one|\ref MDBX_CURRENT + \ref MDBX_ALLDUPS|Overwrite by single new value|
 |Key exist, Multiple values → Error since it is unclear which of the values should be updated|\ref mdbx_put() with \ref MDBX_CURRENT|Error \ref MDBX_EMULTIVAL|
 |Key exist, Multiple values → Update particular entry of multi-value|\ref mdbx_replace() with \ref MDBX_CURRENT + \ref MDBX_NOOVERWRITE and the parameter `old_value` filled with the value that wanna to update|Update one multi-value entry|
@@ -171,12 +163,12 @@ as a duplicates or as like a multiple values corresponds to keys.
 |Delete one value at the current cursor position|\ref mdbx_cursor_del() with \ref MDBX_CURRENT flag|Deletion only the current entry|
 |Delete all values of key at the current cursor position|\ref mdbx_cursor_del() with with \ref MDBX_ALLDUPS flag|Deletion all duplicates of key (all multi-values) at the current cursor position|
 
- defgroup c_cursors Cursors
- defgroup c_statinfo Statistics & Information
- defgroup c_settings Settings
- defgroup c_debug Logging and runtime debug
- defgroup c_rqest Range query estimation
- defgroup c_extra Extra operations
+ \defgroup c_cursors Cursors
+ \defgroup c_statinfo Statistics & Information
+ \defgroup c_settings Settings
+ \defgroup c_debug Logging and runtime debug
+ \defgroup c_rqest Range query estimation
+ \defgroup c_extra Extra operations
 */
 /* *INDENT-ON* */
 /* clang-format on */
@@ -634,9 +626,9 @@ typedef mode_t mdbx_mode_t;
 extern "C" {
 #endif
 
-/* MDBX version 0.11.x */
+/* MDBX version 0.12.x */
 #define MDBX_VERSION_MAJOR 0
-#define MDBX_VERSION_MINOR 11
+#define MDBX_VERSION_MINOR 12
 
 #ifndef LIBMDBX_API
 #if defined(LIBMDBX_EXPORTS)
@@ -966,16 +958,8 @@ DEFINE_ENUM_FLAG_OPERATORS(MDBX_debug_flags_t)
  * called before printing the message and aborting.
  * \see mdbx_setup_debug()
  *
- * \param [in] loglevel  The severity of message.
- * \param [in] function  The function name which emits message,
- *                       may be NULL.
- * \param [in] line      The source code line number which emits message,
- *                       may be zero.
- * \param [in] fmt       The printf-like format string with message.
- * \param [in] args      The variable argument list respectively for the
- *                       format-message string passed by `fmt` argument.
- *                       Maybe NULL or invalid if the format-message string
- *                       don't contain `%`-specification of arguments. */
+ * \param [in] env  An environment handle returned by \ref mdbx_env_create().
+ * \param [in] msg  The assertion message, not including newline. */
 typedef void MDBX_debug_func(MDBX_log_level_t loglevel, const char *function,
                              int line, const char *fmt,
                              va_list args) MDBX_CXX17_NOEXCEPT;
@@ -994,12 +978,8 @@ LIBMDBX_API int mdbx_setup_debug(MDBX_log_level_t log_level,
  * called before printing the message and aborting.
  * \see mdbx_env_set_assert()
  *
- * \param [in] env       An environment handle.
- * \param [in] msg       The assertion message, not including newline.
- * \param [in] function  The function name where the assertion check failed,
- *                       may be NULL.
- * \param [in] line      The line number in the source file
- *                       where the assertion check failed, may be zero. */
+ * \param [in] env  An environment handle returned by mdbx_env_create().
+ * \param [in] msg  The assertion message, not including newline. */
 typedef void MDBX_assert_func(const MDBX_env *env, const char *msg,
                               const char *function,
                               unsigned line) MDBX_CXX17_NOEXCEPT;
@@ -1042,6 +1022,13 @@ LIBMDBX_API void mdbx_assert_fail(const MDBX_env *env, const char *msg,
  * \see mdbx_env_open() \see mdbx_env_set_flags() */
 enum MDBX_env_flags_t {
   MDBX_ENV_DEFAULTS = 0,
+
+  /** Extra validation of DB structure and pages content.
+   *
+   * The `MDBX_VALIDATION` enabled the simple safe/careful mode for working
+   * with damaged or untrusted DB. However, a notable performance
+   * degradation should be expected. */
+  MDBX_VALIDATION = UINT32_C(0x00002000),
 
   /** No environment directory.
    *
@@ -1115,8 +1102,8 @@ enum MDBX_env_flags_t {
    * while opening the database/environment which is already used by another
    * process(es) with unknown mode/flags. In such cases, if there is a
    * difference in the specified flags (\ref MDBX_NOMETASYNC,
-   * \ref MDBX_SAFE_NOSYNC, \ref MDBX_UTTERLY_NOSYNC, \ref MDBX_LIFORECLAIM,
-   * \ref MDBX_COALESCE and \ref MDBX_NORDAHEAD), instead of returning an error,
+   * \ref MDBX_SAFE_NOSYNC, \ref MDBX_UTTERLY_NOSYNC, \ref MDBX_LIFORECLAIM
+   * and \ref MDBX_NORDAHEAD), instead of returning an error,
    * the database will be opened in a compatibility with the already used mode.
    *
    * `MDBX_ACCEDE` has no effect if the current process is the only one either
@@ -1223,6 +1210,7 @@ enum MDBX_env_flags_t {
   MDBX_NOMEMINIT = UINT32_C(0x1000000),
 
   /** Aims to coalesce a Garbage Collection items.
+   * \note Always enabled since v0.12
    *
    * With `MDBX_COALESCE` flag MDBX will aims to coalesce items while recycling
    * a Garbage Collection. Technically, when possible short lists of pages
@@ -2411,7 +2399,7 @@ typedef struct MDBX_stat MDBX_stat;
 /** \brief Return statistics about the MDBX environment.
  * \ingroup c_statinfo
  *
- * At least one of `env` or `txn` argument must be non-null. If txn is passed
+ * At least one of env or txn argument must be non-null. If txn is passed
  * non-null then stat will be filled accordingly to the given transaction.
  * Otherwise, if txn is null, then stat will be populated by a snapshot from
  * the last committed write transaction, and at next time, other information
@@ -2510,6 +2498,9 @@ struct MDBX_envinfo {
     uint64_t unspill; /**< Quantity of unspilled/reloaded pages */
     uint64_t wops;    /**< Number of explicit write operations (not a pages)
                            to a disk */
+    uint64_t
+        gcrtime_seconds16dot16; /**< Time spent loading and searching inside
+                                     GC (aka FreeDB) in 1/65536 of second. */
   } mi_pgop_stat;
 };
 #ifndef __cplusplus
@@ -2520,7 +2511,7 @@ typedef struct MDBX_envinfo MDBX_envinfo;
 /** \brief Return information about the MDBX environment.
  * \ingroup c_statinfo
  *
- * At least one of `env` or `txn` argument must be non-null. If txn is passed
+ * At least one of env or txn argument must be non-null. If txn is passed
  * non-null then stat will be filled accordingly to the given transaction.
  * Otherwise, if txn is null, then stat will be populated by a snapshot from
  * the last committed write transaction, and at next time, other information
@@ -5083,11 +5074,12 @@ LIBMDBX_API int mdbx_thread_unregister(const MDBX_env *env);
  *                     this value into account to evaluate the impact that
  *                     a long-running transaction has.
  * \param [in] retry   A retry number starting from 0.
- *                     If callback has returned 0 at least once, then at end
- *                     of current handling loop the callback function will be
- *                     called additionally with negative value to notify about
- *                     the end of loop. The callback function can use this value
- *                     to implement timeout logic while waiting for readers.
+ *                     If callback has returned 0 at least once, then at end of
+ *                     current handling loop the callback function will be
+ *                     called additionally with negative `retry` value to notify
+ *                     about the end of loop. The callback function can use this
+ *                     fact to implement timeout reset logic while waiting for
+ *                     a readers.
  *
  * \returns The RETURN CODE determines the further actions libmdbx and must
  *          match the action which was executed by the callback:
@@ -5110,7 +5102,7 @@ LIBMDBX_API int mdbx_thread_unregister(const MDBX_env *env);
  * \retval 1           Transaction aborted asynchronous and reader slot
  *                     should be cleared immediately, i.e. read transaction
  *                     will not continue but \ref mdbx_txn_abort()
- *                     or \ref mdbx_txn_reset() will be called later.
+ *                     nor \ref mdbx_txn_reset() will be called later.
  *
  * \retval 2 or great  The reader process was terminated or killed,
  *                     and libmdbx should entirely reset reader registration.
