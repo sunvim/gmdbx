@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"runtime"
 	"time"
 
@@ -14,8 +15,55 @@ import (
 
 func main() {
 	fmt.Println("test mdbx go")
-	testRead()
+	cwrite()
+	// testRead()
 	// testWrite()
+}
+
+func cwrite() {
+	os.RemoveAll("tmp.db")
+
+	env, err := gmdbx.NewEnv()
+	if !errors.Is(err, gmdbx.ErrSuccess) {
+		log.Fatal("open env: ", err)
+	}
+
+	if err = env.SetMaxDBS(1); err != gmdbx.ErrSuccess {
+		log.Fatal("set max dbs: ", err)
+	}
+
+	err = env.SetGeometry(defaultGeometry)
+	if err != gmdbx.ErrSuccess {
+		log.Fatal("set geometry failed")
+	}
+	err = env.SetOption(gmdbx.OptTxnDpLimit, 65535)
+	if err != gmdbx.ErrSuccess {
+		log.Fatal("set tx dp limit failed")
+	}
+
+	err = env.Open("tmp.db", gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable, 0755)
+	if !errors.Is(err, gmdbx.ErrSuccess) {
+		log.Fatal("open db failed: ", err)
+	}
+	defer env.Close(false)
+
+	tx := &gmdbx.Tx{}
+	if err = env.Begin(tx, gmdbx.TxReadWrite); err != gmdbx.ErrSuccess {
+		log.Fatal("open tx failed: ", err)
+	}
+	defer tx.Commit()
+
+	dbi, err := tx.OpenDBI("default", gmdbx.DBCreate)
+	if err != gmdbx.ErrSuccess {
+		log.Fatal("open dbi failed: ", err)
+	}
+	defer env.CloseDBI(dbi)
+	hello := []byte("hello")
+	key := gmdbx.Bytes(&hello)
+	value := []byte{}
+	val := gmdbx.Bytes(&value)
+	tx.Put(dbi, &key, &val, gmdbx.PutUpsert)
+
 }
 func testRead() {
 	env, err := gmdbx.NewEnv()
@@ -51,7 +99,7 @@ func testRead() {
 		k := gmdbx.Bytes(&kb)
 		tx.Get(dbi, &k, &vb)
 		if vb.Len != 0 {
-			println("idx: ", i, " content: ", vb.String())
+			// println("idx: ", i, " content: ", vb.String())
 			cnt++
 		}
 	}

@@ -142,10 +142,14 @@ func F64(v *float64) Val {
 }
 
 func Bytes(b *[]byte) Val {
-	return Val{
-		Base: &(*b)[0],
-		Len:  uint64(len(*b)),
+	bl := len(*b)
+	if bl > 0 {
+		return Val{
+			Base: &(*b)[0],
+			Len:  uint64(bl),
+		}
 	}
+	return Val{}
 }
 
 func String(s *string) Val {
