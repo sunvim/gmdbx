@@ -51,7 +51,7 @@ func testRead() {
 		k := gmdbx.Bytes(&kb)
 		tx.Get(dbi, &k, &vb)
 		if vb.Len != 0 {
-			println("idx: ", i, " content: ", vb.String())
+			// println("idx: ", i, " content: ", vb.String())
 			cnt++
 		}
 	}

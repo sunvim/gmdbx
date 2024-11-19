@@ -65,15 +65,18 @@ type EnvInfo struct {
 	// and aborted) transactions in the current multi-process session (since the
 	// first process opened the database after everyone had previously closed it).
 	PGOpStat struct {
-		Newly                 uint64 // Quantity of a new pages added
-		Cow                   uint64 // Quantity of pages copied for update
-		Clone                 uint64 // Quantity of parent's dirty pages clones for nested transactions
-		Split                 uint64 // Page splits
-		Merge                 uint64 // Page merges
-		Spill                 uint64 // Quantity of spilled dirty pages
-		UnSpill               uint64 // Quantity of unspilled/reloaded pages
-		Wops                  uint64 // Number of explicit write operations (not a pages) to a disk
-		GcrtimeSeconds16dot16 uint64 //Time spent loading and searching inside GC (aka FreeDB) in 1/65536 of second.
+		Newly    uint64 // Quantity of a new pages added
+		Cow      uint64 // Quantity of pages copied for update
+		Clone    uint64 // Quantity of parent's dirty pages clones for nested transactions
+		Split    uint64 // Page splits
+		Merge    uint64 // Page merges
+		Spill    uint64 // Quantity of spilled dirty pages
+		UnSpill  uint64 // Quantity of unspilled/reloaded pages
+		Wops     uint64 // Number of explicit write operations (not a pages) to a disk
+		Prefault uint64
+		MinCore  uint64
+		Msync    uint64
+		Fsync    uint64
 	}
 }
 
