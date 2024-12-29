@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -28,7 +30,14 @@ func testRead() {
 
 	env.SetGeometry(defaultGeometry)
 
-	err = env.Open("tmp.db", gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable, 0755)
+	path := "tmp/test.db"
+
+	baseDir := filepath.Dir(path)
+	if baseDir != "" {
+		os.MkdirAll(baseDir, 0755)
+	}
+
+	err = env.Open(path, gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable|gmdbx.EnvNoSubDir, 0600)
 	if !errors.Is(err, gmdbx.ErrSuccess) {
 		log.Fatal("open db failed: ", err)
 	}
@@ -41,17 +50,20 @@ func testRead() {
 	defer tx.Commit()
 	dbi, _ := tx.OpenDBI("default", gmdbx.DBCreate)
 	defer env.CloseDBI(dbi)
-	const prikey = "user/"
 	stx := time.Now()
 	var i uint64
-	var vb = gmdbx.Val{}
 	var cnt uint64
 	for i = 0; i < 100000; i++ {
-		kb := append([]byte(prikey), I2b(i)...)
+		kb := I2b(i)
 		k := gmdbx.Bytes(&kb)
-		tx.Get(dbi, &k, &vb)
+		vb := gmdbx.Val{}
+		gerr := tx.Get(dbi, &k, &vb)
+		if gerr != gmdbx.ErrSuccess {
+			fmt.Printf("key: %v get failed: %v\n", k.Bytes(), gerr)
+			return
+		}
 		if vb.Len != 0 {
-			// println("idx: ", i, " content: ", vb.String())
+			fmt.Printf("key: %x, value: %s\n", k.Bytes(), vb.String())
 			cnt++
 		}
 	}
@@ -79,7 +91,13 @@ func testWrite() {
 		log.Fatal("set tx dp limit failed")
 	}
 
-	err = env.Open("tmp.db", gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable, 0755)
+	path := "tmp/test.db"
+
+	baseDir := filepath.Dir(path)
+	if baseDir != "" {
+		os.MkdirAll(baseDir, 0755)
+	}
+	err = env.Open(path, gmdbx.EnvNoMetaSync|gmdbx.EnvSyncDurable|gmdbx.EnvNoSubDir, 0600)
 	if !errors.Is(err, gmdbx.ErrSuccess) {
 		log.Fatal("open db failed: ", err)
 	}
@@ -106,8 +124,8 @@ func testWrite() {
 	defer runtime.UnlockOSThread()
 
 	for i = 0; i < 100000; i++ {
-		kb := append([]byte(prikey), I2b(i)...)
-		vb := randomString(4096)
+		kb := I2b(i)
+		vb := randomString(64)
 		k := gmdbx.Bytes(&kb)
 		v := gmdbx.Bytes(&vb)
 		if err = tx.Put(dbi, &k, &v, gmdbx.PutUpsert); err != gmdbx.ErrSuccess {
@@ -155,7 +173,7 @@ var (
 	defaultGeometry = gmdbx.Geometry{
 		SizeLower:       1 << 30,
 		SizeNow:         1 << 30,
-		SizeUpper:       1 << 34,
+		SizeUpper:       1 << 30,
 		GrowthStep:      1 << 30,
 		ShrinkThreshold: 1 << 63,
 		PageSize:        1 << 16,

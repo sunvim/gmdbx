@@ -6,7 +6,6 @@ package gmdbx
 import "C"
 
 import (
-	"reflect"
 	"syscall"
 	"unsafe"
 )
@@ -22,41 +21,25 @@ func ToVal[T int | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64
 
 func (v *Val) String() string {
 	b := make([]byte, v.Len)
-	var nb []byte
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&nb))
-	bh.Data = uintptr(unsafe.Pointer(v.Base))
-	bh.Cap = int(v.Len)
-	bh.Len = int(v.Len)
-	copy(b, nb)
+	bh := unsafe.Slice((*byte)(unsafe.Pointer(v.Base)), int(v.Len))
+	copy(b, bh)
 	return *(*string)(unsafe.Pointer(&b))
 }
 
 func (v *Val) UnsafeString() string {
-	var s string
-	ns := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	ns.Data = uintptr(unsafe.Pointer(v.Base))
-	ns.Len = int(v.Len)
-	return s
+	bh := unsafe.Slice((*byte)(unsafe.Pointer(v.Base)), int(v.Len))
+	return *(*string)(unsafe.Pointer(&bh))
 }
 
 func (v *Val) Bytes() []byte {
 	b := make([]byte, v.Len)
-	var nb []byte
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&nb))
-	bh.Data = uintptr(unsafe.Pointer(v.Base))
-	bh.Cap = int(v.Len)
-	bh.Len = int(v.Len)
-	copy(b, nb)
+	bh := unsafe.Slice((*byte)(unsafe.Pointer(v.Base)), int(v.Len))
+	copy(b, bh)
 	return b
 }
 
 func (v *Val) UnsafeBytes() []byte {
-	var nb []byte
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&nb))
-	bh.Data = uintptr(unsafe.Pointer(v.Base))
-	bh.Cap = int(v.Len)
-	bh.Len = int(v.Len)
-	return nb
+	return unsafe.Slice((*byte)(unsafe.Pointer(v.Base)), int(v.Len))
 }
 
 func (v *Val) Copy(dst []byte) []byte {
@@ -149,19 +132,17 @@ func Bytes(b *[]byte) Val {
 }
 
 func String(s *string) Val {
-	h := *(*reflect.StringHeader)(unsafe.Pointer(s))
 	return Val{
-		Base: (*byte)(unsafe.Pointer(h.Data)),
-		Len:  uint64(h.Len),
+		Base: unsafe.StringData(*s),
+		Len:  uint64(len(*s)),
 	}
 }
 
 // go:lint:ignore
 func StringConst(s string) Val {
-	h := *(*reflect.StringHeader)(unsafe.Pointer(&s))
 	return Val{
-		Base: (*byte)(unsafe.Pointer(h.Data)),
-		Len:  uint64(h.Len),
+		Base: unsafe.StringData(s),
+		Len:  uint64(len(s)),
 	}
 }
 
