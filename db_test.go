@@ -11,7 +11,7 @@ import (
 )
 
 func newTestDb() (*DB, error) {
-	path := "/tmp/testmdbx"
+	path := "testmdbx"
 	os.RemoveAll(path)
 
 	db, err := New(path)
@@ -35,8 +35,10 @@ func TestUpdateAndView(t *testing.T) {
 	key := []byte("hello")
 	val := []byte("world")
 
+	var dbi DBI
+
 	err = db.Update(func(tx *Tx) error {
-		dbi, err := tx.OpenDBI("test", DBCreate)
+		dbi, err = tx.OpenDBI("test", DBCreate)
 		if err != ErrSuccess {
 			return errors.New(err.Error())
 		}
@@ -55,10 +57,6 @@ func TestUpdateAndView(t *testing.T) {
 	vi := Val{}
 
 	err = db.View(func(tx *Tx) error {
-		dbi, err := tx.OpenDBI("test", DBCreate)
-		if err != ErrSuccess {
-			return errors.New(err.Error())
-		}
 		ki := Bytes(&key)
 		err = tx.Get(dbi, &ki, &vi)
 		if err != ErrSuccess {
